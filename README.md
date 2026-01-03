@@ -1,2 +1,6 @@
 # progetto-system-tutor
-gestione autostrada 
+sistema di gestione autostrada 
+partecipante:
+-Dongmo Fernand
+-Alessandro Perin
+-Beatrice Scanagatta
