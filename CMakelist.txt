@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(SistemaTutorAutostrade LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Richiesto dal testo: ottimizzazione attiva (-O2)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
+
+# Directory include
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+# Raccoglie tutti i sorgenti in src/
+file(GLOB_RECURSE ALL_SRC CONFIGURE_DEPENDS
+  ${CMAKE_SOURCE_DIR}/src/*.cpp
+)
+
+# Separiamo i main (tutor.cpp e simulator.cpp) dal resto
+set(CORE_SRC ${ALL_SRC})
+
+list(FILTER CORE_SRC EXCLUDE REGEX ".*/tutor\\.cpp$")
+list(FILTER CORE_SRC EXCLUDE REGEX ".*/simulator\\.cpp$")
+
+# Libreria con il codice condiviso
+add_library(tutor_core ${CORE_SRC})
+
+# Eseguibile Tutor
+add_executable(tutor ${CMAKE_SOURCE_DIR}/src/tutor.cpp)
+target_link_libraries(tutor PRIVATE tutor_core)
+
+# Eseguibile Simulatore
+add_executable(simulator ${CMAKE_SOURCE_DIR}/src/simulator.cpp)
+target_link_libraries(simulator PRIVATE tutor_core)
