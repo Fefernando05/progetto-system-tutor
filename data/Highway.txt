@@ -1,0 +1,4 @@
+# Highway.txt - esempio per il progetto minimalista
+# Una sola corsia con limite velocità 33.33 m/s (~120 km/h)
+
+Corsia1, 33.33

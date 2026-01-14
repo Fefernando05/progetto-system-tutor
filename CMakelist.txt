@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.10)
+project(SystemTutor)
+
+# Utiliser C++11 (suffisant pour ce projet)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Ajouter le dossier include pour les headers
+include_directories(include)
+
+# Ajouter tous les fichiers sources
+set(SOURCES
+    src/tutor.cpp
+    src/Simulator.cpp
+)
+
+# Créer l'exécutable
+add_executable(SystemTutor ${SOURCES})
