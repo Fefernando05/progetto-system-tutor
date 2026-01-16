@@ -1,34 +1,32 @@
-/*
- * Simulator.h
- * Simula il passaggio dei veicoli sull'autostrada e applica sanzioni
- * Autore: Fernand Dongmo
- */
-
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
 
-// Forward declaration per evitare dipendenza circolare
-class TutorSystem;
-
-#include "Vehicle.h"
 #include "Highway.h"
-#include <vector>
+#include "VehicleRun.h"
+#include <string>
 
-class Simulator
-{
-private:
-    TutorSystem* tutor; // Puntatore al sistema Tutor
-
+class Simulator {
 public:
-    // Costruttore con puntatore a TutorSystem
-    Simulator(TutorSystem* tutorSys);
+    Simulator(const std::string& highwayFile,
+              const std::string& runsFile,
+              const std::string& passagesFile,
+              int numVehicles);
 
-    // Avanza la simulazione
-    void runSimulation(double deltaSeconds);
+    void run();
 
-    // Resetta i veicoli
-    void reset();
+private:
+    Highway highway;
+    std::string runsFilename;
+    std::string passagesFilename;
+    int numVehicles;
+
+    double randDouble(double a, double b);
+    int randInt(int a, int b);
+    std::string randomPlate();
+
+    VehicleRun generateRun();
+    void writeRun(std::ofstream& out, const VehicleRun& v);
+    void computePassages(const VehicleRun& v, std::ofstream& out);
 };
 
 #endif
-
