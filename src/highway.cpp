@@ -1,3 +1,4 @@
+//Alessandro Perin 2137431
 #include "Highway.h"
 
 #include <fstream>
@@ -9,7 +10,7 @@
 // Evita errori a parseLine nel caso nel file di testo ci siano righe vuote
 static bool isBlank(const std::string& line) {
     for (char c : line) {
-        if (!std::isspace(static_cast<unsigned char>(c)))
+        if (!std::isspace(static_cast<unsigned char>(c)))  //controlla se c non è uno spazio vuoto
             return false;
     }
     return true;
@@ -36,33 +37,33 @@ int Highway::countType(NodeType t) const {
 
 std::vector<Highway::Node> Highway::sortedByKm() const {
     std::vector<Node> tmp = nodes_;
-    std::sort(tmp.begin(), tmp.end(), [](const Node& a, const Node& b) {
-        if (a.km != b.km) return a.km < b.km;
+    std::sort(tmp.begin(), tmp.end(), [](const Node& a, const Node& b) {  //funzione per mettere varchi prima di svincoli
+        if (a.km != b.km) return a.km < b.km;                            // se stessa distanza
         return static_cast<int>(a.type) < static_cast<int>(b.type);
     });
     return tmp;
 }
 
-bool Highway::parseLine(const std::string& line, double& km_out, NodeType& type_out) {
-    std::istringstream iss(line);
+bool Highway::parseLine(const std::string& line, double& nodeKm, NodeType& nodeType) {
+    std::istringstream iss(line); //trasformo la stringa in uno stream per leggerla piu facilmente
     double km_val;
-    std::string type_tok;
+    std::string type_lettera;
 
-    if (!(iss >> km_val >> type_tok))
+    if (!(iss >> km_val >> type_lettera))
         return false;
 
-    if (type_tok.size() != 1)
+    if (type_lettera.size() != 1)
         return false;
 
-    char t = type_tok[0];
+    char t = type_lettera[0];
     if (t == 'V' || t == 'v')
-        type_out = NodeType::Varco;
+        nodeType = NodeType::Varco;
     else if (t == 'S' || t == 's')
-        type_out = NodeType::Svincolo;
+        nodeType = NodeType::Svincolo;
     else
         return false;
 
-    km_out = km_val;
+    nodeKm = km_val;
     return true;
 }
 
