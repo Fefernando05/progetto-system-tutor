@@ -68,13 +68,13 @@ bool Highway::parseLine(const std::string& line, double& nodeKm, NodeType& nodeT
 }
 
 void Highway::assignIdsSortedByKm() {
-    std::vector<size_t> idx(nodes_.size());
+    std::vector<size_t> idx(nodes_.size()); //vettore di supporto con i nodi ordinati come nel file 
     for (size_t i = 0; i < idx.size(); i++)
-        idx[i] = i;
+        idx[i] = i; 
 
     std::sort(idx.begin(), idx.end(), [&](size_t a, size_t b) {
         if (nodes_[a].km != nodes_[b].km) return nodes_[a].km < nodes_[b].km;
-        return static_cast<int>(nodes_[a].type) < static_cast<int>(nodes_[b].type);
+        return static_cast<int>(nodes_[a].type) < static_cast<int>(nodes_[b].type);  
     });
 
     int nextVarcoId = 1;
@@ -92,13 +92,13 @@ void Highway::assignIdsSortedByKm() {
 bool Highway::loadFromFile(const std::string& filepath) {
     nodes_.clear();
 
-    std::ifstream fin(filepath);
+    std::ifstream fin(filepath); //se il file non esiste o non riesce ad aprirlo restituisce false 
     if (!fin)
         return false;
 
     std::string line;
     while (std::getline(fin, line)) {
-        if (isBlank(line))
+        if (isBlank(line))  //salta le righe vuote usando la funzione isBlank
             continue;
 
         double km_val = 0.0;
@@ -109,32 +109,32 @@ bool Highway::loadFromFile(const std::string& filepath) {
         Node n;
         n.km = km_val;
         n.type = t;
-        n.id = 0;
+        n.id = 0; //id impostato a 0 perchè l'ordine dei varchi o svincoli nel file potrebbe essere sbagliato
         nodes_.push_back(n);
     }
 
-    assignIdsSortedByKm();
+    assignIdsSortedByKm(); //sistema l'ordine
     return true;
 }
 
-bool Highway::validate(std::ostream& err) const {
-    bool ok = true;
+bool Highway::validate() const {
+    bool ok = true; // uso la variabile ok per "accumulare" gli errori
 
-    if (nodes_.empty()) {
-        err << "Errore: Highway.txt non contiene righe valide.\n";
+    if (nodes_.empty()) {  //se non ci sono nodi da subito errore e interrompe il controllo
+        std::cout << "Errore: Highway.txt non contiene righe valide.\n";
         return false;
     }
 
     int nV = countType(NodeType::Varco);
     int nS = countType(NodeType::Svincolo);
-
+    //controlla che ci siano almeno due svincoli e due varchi
     if (nV < 2) {
-        err << "Errore: devono essere presenti almeno due varchi (V). Trovati: " << nV << "\n";
+        std::cout << "Errore: devono essere presenti almeno due varchi (V). Trovati: " << nV << "\n";
         ok = false;
     }
 
     if (nS < 2) {
-        err << "Errore: devono essere presenti almeno due svincoli (S).\n";
+        std::cout << "Errore: devono essere presenti almeno due svincoli (S).\n";
         ok = false;
     }
 
@@ -151,6 +151,7 @@ bool Highway::validate(std::ostream& err) const {
             hasVarco = true;
         }
     }
+    //controllo che ci sia uno svincolo prima del primo varco e uno dopo l'ultimo varco 
 
     if (hasVarco) {
         bool hasSvincoloBefore = false;
@@ -163,13 +164,14 @@ bool Highway::validate(std::ostream& err) const {
         }
 
         if (!hasSvincoloBefore) {
-            err << "Errore: manca uno svincolo prima del primo varco.\n";
+            std::cout << "Errore: manca uno svincolo prima del primo varco.\n";
             ok = false;
         }
         if (!hasSvincoloAfter) {
-            err << "Errore: manca uno svincolo dopo l'ultimo varco.\n";
+            std::cout << "Errore: manca uno svincolo dopo l'ultimo varco.\n";
             ok = false;
         }
+        //controllo che la distanza sia >= di 1
 
         const double MIN_DIST = 1.0;
         for (const Node& v : srt) {
@@ -178,9 +180,9 @@ bool Highway::validate(std::ostream& err) const {
             for (const Node& s : srt) {
                 if (s.type != NodeType::Svincolo) continue;
 
-                double d = std::fabs(v.km - s.km);
+                double d = std::fabs(v.km - s.km); //fabs per avere sempre un risultato positivo
                 if (d < MIN_DIST) {
-                    err << "Errore: distanza < 1 km tra varco km "
+                    std::cout << "Errore: distanza < 1 km tra varco km "
                         << v.km << " e svincolo km " << s.km << "\n";
                     ok = false;
                 }
@@ -190,7 +192,7 @@ bool Highway::validate(std::ostream& err) const {
 
     for (const Node& n : nodes_) {
         if (n.km < 0.0) {
-            err << "Errore: distanza negativa non ammessa.\n";
+            std::cout << "Errore: distanza negativa non ammessa.\n";
             ok = false;
         }
     }
@@ -198,20 +200,20 @@ bool Highway::validate(std::ostream& err) const {
     return ok;
 }
 
-void Highway::print(std::ostream& out) const {
+void Highway::print() const {
     std::vector<Node> srt = sortedByKm();
 
-    out << "Autostrada (ordinata per km)\n";
+    std::cout << "Autostrada (ordinata per km)\n";
     for (const Node& n : srt) {
         if (n.type == NodeType::Varco)
-            out << "Varco " << n.id << "  km " << n.km << "\n";
+            std::cout << "Varco " << n.id << "  km " << n.km << "\n";
         else
-            out << "Svincolo " << n.id << "  km " << n.km << "\n";
+            std::cout << "Svincolo " << n.id << "  km " << n.km << "\n";
     }
 }
 
 
-std::vector<double> Highway::getGatesKm() const {
+std::vector<double> Highway::getVarchiKm() const { //da la posizione dei varchi in ordine crescente
     std::vector<double> out;
     for (const Node& n : nodes_) {
         if (n.type == NodeType::Varco)
@@ -221,7 +223,7 @@ std::vector<double> Highway::getGatesKm() const {
     return out;
 }
 
-std::vector<double> Highway::getRampsKm() const {
+std::vector<double> Highway::getSvincoliKm() const {  //da la posizione degli svincoli in ordine crescente
     std::vector<double> out;
     for (const Node& n : nodes_) {
         if (n.type == NodeType::Svincolo)
